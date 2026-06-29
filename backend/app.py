@@ -40,10 +40,15 @@ class QueryRequest(BaseModel):
     query: str
     session_id: Optional[str] = None
 
+class Source(BaseModel):
+    """A single source citation with an optional lesson video link"""
+    text: str
+    link: Optional[str] = None
+
 class QueryResponse(BaseModel):
     """Response model for course queries"""
     answer: str
-    sources: List[str]
+    sources: List[Source]
     session_id: str
 
 class CourseStats(BaseModel):
@@ -115,5 +120,8 @@ class DevStaticFiles(StaticFiles):
         return response
     
     
-# Serve static files for the frontend
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
+# Serve static files for the frontend.
+# DevStaticFiles adds no-cache headers so frontend edits show up without a hard
+# refresh. This is a DEV-ONLY convenience — revert to plain StaticFiles before
+# any real deployment (see CLAUDE.md > Dev-only notes).
+app.mount("/", DevStaticFiles(directory="../frontend", html=True), name="static")

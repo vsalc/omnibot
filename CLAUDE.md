@@ -92,3 +92,11 @@ mid-document lesson loop and the final-lesson block — match the existing path 
 All tunables live in `backend/config.py` (`Config` dataclass): `ANTHROPIC_MODEL`,
 `EMBEDDING_MODEL`, `CHUNK_SIZE` (800), `CHUNK_OVERLAP` (100), `MAX_RESULTS` (5),
 `MAX_HISTORY` (2), `CHROMA_PATH`.
+
+## Dev-only notes
+
+- **No-cache static files** — the frontend is mounted with `DevStaticFiles` (in
+  `backend/app.py`), which sends `Cache-Control: no-cache` so edits to `script.js` /
+  `style.css` appear without a hard browser refresh. This is a development
+  convenience only. **Before any real deployment, revert the mount to plain
+  `StaticFiles`** so browsers can cache static assets normally.
