@@ -4,7 +4,9 @@ from search_tools import CourseSearchTool
 from vector_store import SearchResults
 
 
-def test_returns_formatted_results_with_headers(mock_vector_store, sample_search_results):
+def test_returns_formatted_results_with_headers(
+    mock_vector_store, sample_search_results
+):
     mock_vector_store.search.return_value = sample_search_results
     tool = CourseSearchTool(mock_vector_store)
 

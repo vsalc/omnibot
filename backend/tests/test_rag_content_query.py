@@ -89,8 +89,16 @@ def _seed(rag):
             course_link="https://example.com/mcp",
             instructor="Ada",
             lessons=[
-                Lesson(lesson_number=1, title="Intro", lesson_link="https://example.com/mcp/1"),
-                Lesson(lesson_number=2, title="Servers", lesson_link="https://example.com/mcp/2"),
+                Lesson(
+                    lesson_number=1,
+                    title="Intro",
+                    lesson_link="https://example.com/mcp/1",
+                ),
+                Lesson(
+                    lesson_number=2,
+                    title="Servers",
+                    lesson_link="https://example.com/mcp/2",
+                ),
             ],
         )
     )
@@ -138,4 +146,7 @@ def test_content_query_runs_real_search_end_to_end(tmp_path, make_anthropic_resp
     # The tool_result fed back to the LLM contains real retrieved content.
     second_call = fake_client.messages.create.call_args_list[1].kwargs
     tool_result = second_call["messages"][2]["content"][0]
-    assert "MCP" in tool_result["content"] or "Model Context Protocol" in tool_result["content"]
+    assert (
+        "MCP" in tool_result["content"]
+        or "Model Context Protocol" in tool_result["content"]
+    )
