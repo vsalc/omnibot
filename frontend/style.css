@@ -46,6 +46,7 @@
 
 /* Smooth theme transitions */
 body,
+header,
 .sidebar,
 .chat-main,
 .chat-container,
@@ -62,16 +63,13 @@ body,
 
 /* Theme Toggle Button */
 .theme-toggle {
-    position: fixed;
-    top: 1.25rem;
-    right: 1.25rem;
-    z-index: 100;
+    flex-shrink: 0;
     width: 44px;
     height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface);
+    background: var(--background);
     color: var(--text-primary);
     border: 1px solid var(--border-color);
     border-radius: 50%;
@@ -140,9 +138,31 @@ body {
     padding: 0;
 }
 
-/* Header - Hidden */
+/* Header */
 header {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: var(--surface);
+    box-shadow: var(--shadow);
+    flex-shrink: 0;
+    position: relative;
+}
+
+header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #2563eb 100%);
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
 }
 
 header h1 {
@@ -158,7 +178,7 @@ header h1 {
 .subtitle {
     font-size: 0.95rem;
     color: var(--text-secondary);
-    margin-top: 0.5rem;
+    margin-top: 0.25rem;
 }
 
 /* Main Content Area with Sidebar */
@@ -821,11 +841,15 @@ details[open] .suggested-header::before {
     }
     
     header {
-        padding: 1rem;
+        padding: 0.75rem 1rem;
     }
-    
+
     header h1 {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
+    }
+
+    .subtitle {
+        font-size: 0.8rem;
     }
     
     .chat-messages {
