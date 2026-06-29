@@ -22,4 +22,8 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ["backend"]
 testpaths = ["backend/tests"]
-addopts = "-ra"
+addopts = "-ra --strict-markers --strict-config"
+filterwarnings = [
+    "ignore:resource_tracker:UserWarning",
+    "ignore::DeprecationWarning:fastapi.*",
+]
