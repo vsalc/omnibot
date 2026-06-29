@@ -6,9 +6,13 @@ imports resolve when the suite runs from the repo root.
 """
 
 from types import SimpleNamespace
+from typing import List, Optional
 from unittest.mock import MagicMock
 
 import pytest
+from fastapi import FastAPI, HTTPException
+from fastapi.testclient import TestClient
+from pydantic import BaseModel
 
 from vector_store import VectorStore, SearchResults
 from models import Course, Lesson, CourseChunk
@@ -121,3 +125,102 @@ def seeded_vector_store(tmp_path):
     store.add_course_metadata(course)
     store.add_course_content(chunks)
     return store
+
+
+# --------------------------------------------------------------------------- #
+# API / FastAPI fixtures
+#
+# ``backend/app.py`` can't be imported under test: at module load it constructs a
+# real ``RAGSystem`` (needs an API key + downloads an embedding model) and mounts
+# ``../frontend`` as static files, which doesn't exist in the test environment.
+# We rebuild an equivalent app here over a mocked RAGSystem, omitting the static
+# mount and serving a stub root route instead.
+# --------------------------------------------------------------------------- #
+@pytest.fixture
+def mock_rag_system():
+    """A RAGSystem double for driving the API without real search / LLM calls."""
+    rag = MagicMock()
+    rag.query.return_value = (
+        "MCP lets clients call tools over a server.",
+        [{"text": "MCP Course - Lesson 1", "link": "https://example.com/mcp/1"}],
+    )
+    rag.session_manager.create_session.return_value = "session-1"
+    rag.get_course_analytics.return_value = {
+        "total_courses": 2,
+        "course_titles": ["MCP Course", "Advanced RAG"],
+    }
+    return rag
+
+
+@pytest.fixture
+def test_app(mock_rag_system):
+    """A FastAPI app mirroring ``app.py``'s routes, backed by ``mock_rag_system``.
+
+    No static-file mount and no startup ingestion — just the JSON API plus a stub
+    ``/`` route standing in for the frontend that StaticFiles would otherwise serve.
+    """
+
+    app = FastAPI(title="Course Materials RAG System (test)")
+
+    class QueryRequest(BaseModel):
+        query: str
+        session_id: Optional[str] = None
+
+    class ClearSessionRequest(BaseModel):
+        session_id: str
+
+    class Source(BaseModel):
+        text: str
+        link: Optional[str] = None
+
+    class QueryResponse(BaseModel):
+        answer: str
+        sources: List[Source]
+        session_id: str
+
+    class CourseStats(BaseModel):
+        total_courses: int
+        course_titles: List[str]
+
+    @app.post("/api/query", response_model=QueryResponse)
+    async def query_documents(request: QueryRequest):
+        try:
+            session_id = request.session_id
+            if not session_id:
+                session_id = mock_rag_system.session_manager.create_session()
+            answer, sources = mock_rag_system.query(request.query, session_id)
+            return QueryResponse(answer=answer, sources=sources, session_id=session_id)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.post("/api/session/clear")
+    async def clear_session(request: ClearSessionRequest):
+        try:
+            mock_rag_system.session_manager.clear_session(request.session_id)
+            return {"status": "ok"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/api/courses", response_model=CourseStats)
+    async def get_course_stats():
+        try:
+            analytics = mock_rag_system.get_course_analytics()
+            return CourseStats(
+                total_courses=analytics["total_courses"],
+                course_titles=analytics["course_titles"],
+            )
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    @app.get("/")
+    async def root():
+        # Stands in for the StaticFiles-served frontend index in the real app.
+        return {"status": "ok"}
+
+    return app
+
+
+@pytest.fixture
+def client(test_app):
+    """A ``TestClient`` over the in-process test app."""
+    return TestClient(test_app)
