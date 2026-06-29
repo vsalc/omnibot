@@ -40,6 +40,10 @@ class QueryRequest(BaseModel):
     query: str
     session_id: Optional[str] = None
 
+class ClearSessionRequest(BaseModel):
+    """Request model for clearing a session"""
+    session_id: str
+
 class Source(BaseModel):
     """A single source citation with an optional lesson video link"""
     text: str
@@ -75,6 +79,15 @@ async def query_documents(request: QueryRequest):
             sources=sources,
             session_id=session_id
         )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/session/clear")
+async def clear_session(request: ClearSessionRequest):
+    """Release a session's conversation history (called when starting a new chat)."""
+    try:
+        rag_system.session_manager.clear_session(request.session_id)
+        return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

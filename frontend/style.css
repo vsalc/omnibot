@@ -479,6 +479,28 @@ a.source-link:hover {
     margin: 0.5rem 0;
 }
 
+/* New Chat Button */
+.new-chat-button {
+    width: 100%;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: none;
+    border: none;
+    padding: 0.5rem 0;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.new-chat-button:hover,
+.new-chat-button:focus {
+    color: var(--primary-color);
+    outline: none;
+}
+
 /* Sidebar Headers */
 .stats-header,
 .suggested-header {
