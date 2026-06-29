@@ -13,6 +13,7 @@ __pycache__/
 venv/
 env/
 ENV/
+.venv/
 
 # ChromaDB
 backend/chroma_db/
@@ -33,3 +34,6 @@ Thumbs.db
 # Local Claude Code instructions
 CLAUDE.local.md
 .claude/settings.local.json
+
+# Git worktrees (local development)
+.trees/
