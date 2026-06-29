@@ -29,3 +29,6 @@ uploads/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local Claude Code instructions
+claude.local.md
