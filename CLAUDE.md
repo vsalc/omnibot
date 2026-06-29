@@ -19,14 +19,20 @@ uv sync                 # install/update dependencies from pyproject.toml + uv.l
 
 # Manual start (equivalent to run.sh):
 cd backend && uv run uvicorn app:app --reload --port 8000
+
+# Code quality:
+./scripts/format.sh     # auto-format all Python with black
+./scripts/check.sh      # black --check (formatting) + pytest; fails if unformatted
+uv run pytest           # tests only
 ```
 
 - Web UI: http://localhost:8000  •  API docs: http://localhost:8000/docs
 - Requires `ANTHROPIC_API_KEY` in a `.env` at the repo root (`cp .env.example .env`).
   Loaded by `backend/config.py` via `load_dotenv()`. Server boots without it but every
   query fails.
-- There is **no test suite, linter, or build step**. `main.py` is an unused stub — not
-  the entrypoint.
+- Code is formatted with **black** (config in `pyproject.toml`, `[tool.black]`). Run
+  `./scripts/format.sh` after editing Python; `./scripts/check.sh` enforces it.
+- There is **no build step**. `main.py` is an unused stub — not the entrypoint.
 
 ## Architecture
 

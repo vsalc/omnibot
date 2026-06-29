@@ -46,9 +46,7 @@ def _text_block(text):
 
 
 def _tool_use_block(name, tool_input, block_id="tool_1"):
-    return SimpleNamespace(
-        type="tool_use", name=name, input=tool_input, id=block_id
-    )
+    return SimpleNamespace(type="tool_use", name=name, input=tool_input, id=block_id)
 
 
 @pytest.fixture
@@ -96,8 +94,14 @@ def seeded_vector_store(tmp_path):
         course_link="https://example.com/mcp",
         instructor="Ada",
         lessons=[
-            Lesson(lesson_number=1, title="Intro", lesson_link="https://example.com/mcp/1"),
-            Lesson(lesson_number=2, title="Servers", lesson_link="https://example.com/mcp/2"),
+            Lesson(
+                lesson_number=1, title="Intro", lesson_link="https://example.com/mcp/1"
+            ),
+            Lesson(
+                lesson_number=2,
+                title="Servers",
+                lesson_link="https://example.com/mcp/2",
+            ),
         ],
     )
     chunks = [

@@ -1,6 +1,7 @@
 import anthropic
 from typing import List, Optional, Dict, Any, Tuple
 
+
 class AIGenerator:
     """Handles interactions with Anthropic's Claude API for generating responses"""
 
@@ -44,35 +45,34 @@ All responses must be:
 4. **Example-supported** - Include relevant examples when they aid understanding
 Provide only the direct answer to what was asked.
 """
-    
+
     def __init__(self, api_key: str, model: str):
         self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
-        
+
         # Pre-build base API parameters
-        self.base_params = {
-            "model": self.model,
-            "temperature": 0,
-            "max_tokens": 800
-        }
-    
-    def generate_response(self, query: str,
-                         conversation_history: Optional[str] = None,
-                         tools: Optional[List] = None,
-                         tool_manager=None) -> str:
+        self.base_params = {"model": self.model, "temperature": 0, "max_tokens": 800}
+
+    def generate_response(
+        self,
+        query: str,
+        conversation_history: Optional[str] = None,
+        tools: Optional[List] = None,
+        tool_manager=None,
+    ) -> str:
         """
         Generate AI response with optional tool usage and conversation context.
-        
+
         Args:
             query: The user's question or request
             conversation_history: Previous messages for context
             tools: Available tools the AI can use
             tool_manager: Manager to execute tools
-            
+
         Returns:
             Generated response as string
         """
-        
+
         # Build system content efficiently - avoid string ops when possible
         system_content = (
             f"{self.SYSTEM_PROMPT}\n\nPrevious conversation:\n{conversation_history}"
@@ -122,7 +122,9 @@ Provide only the direct answer to what was asked.
         )
         return self._extract_text(final_response)
 
-    def _execute_tool_calls(self, response, tool_manager) -> Tuple[List[Dict[str, Any]], bool]:
+    def _execute_tool_calls(
+        self, response, tool_manager
+    ) -> Tuple[List[Dict[str, Any]], bool]:
         """
         Execute every tool_use block in a response and collect their results.
 

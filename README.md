@@ -54,3 +54,16 @@ The application will be available at:
 - Web Interface: `http://localhost:8000`
 - API Documentation: `http://localhost:8000/docs`
 
+## Development
+
+Code is formatted with [black](https://black.readthedocs.io/). The dev tools are
+installed by `uv sync` (they live in the `dev` dependency group).
+
+```bash
+./scripts/format.sh   # auto-format all Python code with black
+./scripts/check.sh    # verify formatting (black --check) and run the test suite
+```
+
+Run `./scripts/check.sh` before committing — it fails if any file is not
+formatted, mirroring what a CI check would enforce.
+

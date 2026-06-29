@@ -38,7 +38,9 @@ def test_first_call_advertises_tools(patched_client, make_anthropic_response):
     assert params["tool_choice"] == {"type": "auto"}
 
 
-def test_conversation_history_injected_into_system(patched_client, make_anthropic_response):
+def test_conversation_history_injected_into_system(
+    patched_client, make_anthropic_response
+):
     patched_client.messages.create.return_value = make_anthropic_response(text="ok")
     gen = AIGenerator(api_key="k", model="m")
 
@@ -49,7 +51,9 @@ def test_conversation_history_injected_into_system(patched_client, make_anthropi
     assert "USER: earlier" in params["system"]
 
 
-def test_tool_use_triggers_execution_and_second_call(patched_client, make_anthropic_response):
+def test_tool_use_triggers_execution_and_second_call(
+    patched_client, make_anthropic_response
+):
     # First call asks for a tool; second call returns the synthesized answer.
     patched_client.messages.create.side_effect = [
         make_anthropic_response(tool_use=("search_course_content", {"query": "mcp"})),
@@ -72,7 +76,9 @@ def test_tool_use_triggers_execution_and_second_call(patched_client, make_anthro
     )
 
 
-def test_second_round_readvertises_tools_with_tool_result(patched_client, make_anthropic_response):
+def test_second_round_readvertises_tools_with_tool_result(
+    patched_client, make_anthropic_response
+):
     patched_client.messages.create.side_effect = [
         make_anthropic_response(tool_use=("search_course_content", {"query": "mcp"})),
         make_anthropic_response(text="done"),
@@ -94,9 +100,9 @@ def test_second_round_readvertises_tools_with_tool_result(patched_client, make_a
     assert second["tool_choice"] == {"type": "auto"}
 
     messages = second["messages"]
-    assert messages[0]["role"] == "user"          # original query
-    assert messages[1]["role"] == "assistant"     # tool_use turn
-    assert messages[2]["role"] == "user"          # tool_result turn
+    assert messages[0]["role"] == "user"  # original query
+    assert messages[1]["role"] == "assistant"  # tool_use turn
+    assert messages[2]["role"] == "user"  # tool_result turn
 
     tool_result = messages[2]["content"][0]
     assert tool_result["type"] == "tool_result"
@@ -104,11 +110,17 @@ def test_second_round_readvertises_tools_with_tool_result(patched_client, make_a
     assert tool_result["content"] == "TOOL RESULT TEXT"
 
 
-def test_two_rounds_then_synthesis_without_tools(patched_client, make_anthropic_response):
+def test_two_rounds_then_synthesis_without_tools(
+    patched_client, make_anthropic_response
+):
     # Round 1 outline -> round 2 search -> tools-stripped synthesis call.
     patched_client.messages.create.side_effect = [
-        make_anthropic_response(tool_use=("get_course_outline", {"course_name": "X"}), block_id="tool_1"),
-        make_anthropic_response(tool_use=("search_course_content", {"query": "topic"}), block_id="tool_2"),
+        make_anthropic_response(
+            tool_use=("get_course_outline", {"course_name": "X"}), block_id="tool_1"
+        ),
+        make_anthropic_response(
+            tool_use=("search_course_content", {"query": "topic"}), block_id="tool_2"
+        ),
         make_anthropic_response(text="final answer"),
     ]
     tool_manager = MagicMock()
@@ -133,8 +145,12 @@ def test_two_rounds_then_synthesis_without_tools(patched_client, make_anthropic_
 def test_round_two_tool_is_executed(patched_client, make_anthropic_response):
     # The cap is on rounds, not on executing round 2's tool.
     patched_client.messages.create.side_effect = [
-        make_anthropic_response(tool_use=("get_course_outline", {"course_name": "X"}), block_id="tool_1"),
-        make_anthropic_response(tool_use=("search_course_content", {"query": "topic"}), block_id="tool_2"),
+        make_anthropic_response(
+            tool_use=("get_course_outline", {"course_name": "X"}), block_id="tool_1"
+        ),
+        make_anthropic_response(
+            tool_use=("search_course_content", {"query": "topic"}), block_id="tool_2"
+        ),
         make_anthropic_response(text="final answer"),
     ]
     tool_manager = MagicMock()
@@ -152,7 +168,9 @@ def test_round_two_tool_is_executed(patched_client, make_anthropic_response):
     assert second_call.kwargs == {"query": "topic"}
 
 
-def test_tool_failure_terminates_with_graceful_synthesis(patched_client, make_anthropic_response):
+def test_tool_failure_terminates_with_graceful_synthesis(
+    patched_client, make_anthropic_response
+):
     patched_client.messages.create.side_effect = [
         make_anthropic_response(tool_use=("search_course_content", {"query": "mcp"})),
         make_anthropic_response(text="Sorry, the search failed."),
@@ -183,8 +201,12 @@ def test_tool_failure_terminates_with_graceful_synthesis(patched_client, make_an
 
 def test_context_preserved_between_rounds(patched_client, make_anthropic_response):
     patched_client.messages.create.side_effect = [
-        make_anthropic_response(tool_use=("get_course_outline", {"course_name": "X"}), block_id="tool_1"),
-        make_anthropic_response(tool_use=("search_course_content", {"query": "topic"}), block_id="tool_2"),
+        make_anthropic_response(
+            tool_use=("get_course_outline", {"course_name": "X"}), block_id="tool_1"
+        ),
+        make_anthropic_response(
+            tool_use=("search_course_content", {"query": "topic"}), block_id="tool_2"
+        ),
         make_anthropic_response(text="final answer"),
     ]
     tool_manager = MagicMock()
